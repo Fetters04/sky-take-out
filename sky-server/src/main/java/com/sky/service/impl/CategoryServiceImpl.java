@@ -7,6 +7,7 @@ import com.sky.context.BaseContext;
 import com.sky.dto.CategoryDTO;
 import com.sky.dto.CategoryPageQueryDTO;
 import com.sky.entity.Category;
+import com.sky.entity.Employee;
 import com.sky.mapper.CategoryMapper;
 import com.sky.result.PageResult;
 import com.sky.service.CategoryService;
@@ -63,6 +64,24 @@ public class CategoryServiceImpl implements CategoryService {
         List<Category> result = page.getResult();
 
         return new PageResult(total, result);
+    }
+
+
+    /**
+     * 启用禁用分类
+     * @param status
+     * @param id
+     */
+    @Override
+    public void startOrStop(Integer status, Long id) {
+
+        Category category = Category.builder()
+                .status(status)
+                .id(id)
+                .build();
+
+        categoryMapper.update(category);
+
     }
 
 
