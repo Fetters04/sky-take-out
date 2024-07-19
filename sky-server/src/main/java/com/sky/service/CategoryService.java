@@ -18,4 +18,6 @@ public interface CategoryService {
     List<Category> list(Integer type);
 
     void update(CategoryDTO categoryDTO);
+
+    void deleteById(Long id);
 }
