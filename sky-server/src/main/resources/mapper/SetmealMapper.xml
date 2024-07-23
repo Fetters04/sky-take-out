@@ -5,7 +5,6 @@
 
 <mapper namespace="com.sky.mapper.SetmealMapper">
 
-
     <insert id="insert" parameterType="Setmeal" useGeneratedKeys="true" keyProperty="id">
         insert into setmeal(category_id, name, price, description, status, image, create_time, update_time, create_user, update_user)
         VALUES(#{categoryId}, #{name}, #{price}, #{description}, #{status}, #{image}, #{createTime}, #{updateTime}, #{createUser}, #{updateUser})
@@ -35,5 +34,19 @@
         </foreach>
     </delete>
 
+    <update id="update">
+        update setmeal
+        <set>
+            <if test="categoryId != null">category_id = #{categoryId},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="image != null">image = #{image},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="updateUser != null">update_user = #{updateUser},</if>
+        </set>
+        where id = #{id}
+    </update>
 
 </mapper>
