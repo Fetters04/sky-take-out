@@ -11,3 +11,7 @@ sky:
     access-key-id: LTAI5tJjyQt1koA5p6CSvjEV
     access-key-secret: JtTsB7nj1CBziZE4a3vA5fiVkcqRQS
     bucket-name: sky-nnnu
+  redis:
+    host: localhost
+    port: 6379
+    database: 10
