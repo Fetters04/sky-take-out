@@ -1,8 +1,11 @@
 package com.sky.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
 import com.sky.context.BaseContext;
+import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.dto.OrdersPaymentDTO;
 import com.sky.dto.OrdersSubmitDTO;
 import com.sky.entity.*;
@@ -10,10 +13,12 @@ import com.sky.exception.AddressBookBusinessException;
 import com.sky.exception.OrderBusinessException;
 import com.sky.exception.ShoppingCartBusinessException;
 import com.sky.mapper.*;
+import com.sky.result.PageResult;
 import com.sky.service.OrderService;
 import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
+import com.sky.vo.OrderVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
@@ -157,6 +162,45 @@ public class OrderServiceImpl implements OrderService {
                 .build();
 
         orderMapper.update(orders);
+    }
+
+    /**
+     * 分页查询订单
+     * @param ordersPageQueryDTO
+     * @return
+     */
+    @Override
+    public PageResult pageQuery(OrdersPageQueryDTO ordersPageQueryDTO) {
+
+        ordersPageQueryDTO.setUserId(BaseContext.getCurrentId());
+
+        //开启分页
+        int pageNum = ordersPageQueryDTO.getPage();
+        int pageSize = ordersPageQueryDTO.getPageSize();
+        PageHelper.startPage(pageNum, pageSize);
+
+        //分页条件查询
+        Page<Orders> pageOrders = orderMapper.pageQuery(ordersPageQueryDTO);
+
+        //构造要OrderVO对象集合
+        List<OrderVO> orderVOList = new ArrayList<>();
+
+        //封装集合中的OrderVO对象
+        for (Orders orders : pageOrders) {
+            OrderVO orderVO = new OrderVO();
+            BeanUtils.copyProperties(orders, orderVO);
+
+            Long orderId = orders.getId();
+            List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(orderId);
+            orderVO.setOrderDetailList(orderDetailList);
+
+            //加入到集合中
+            orderVOList.add(orderVO);
+        }
+
+        long total = pageOrders.getTotal();
+
+        return new PageResult(total, orderVOList);
     }
 
 }
