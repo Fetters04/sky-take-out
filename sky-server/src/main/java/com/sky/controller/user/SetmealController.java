@@ -19,7 +19,7 @@ import java.util.List;
 
 @RestController("userSetmealController")
 @RequestMapping("/user/setmeal")
-@Api("套餐浏览接口")
+@Api(tags = "套餐浏览接口")
 @Slf4j
 public class SetmealController {
 
