@@ -25,11 +25,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -177,7 +179,9 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public PageResult pageQuery(OrdersPageQueryDTO ordersPageQueryDTO) {
 
-        ordersPageQueryDTO.setUserId(BaseContext.getCurrentId());
+        //只展示微信用户自己的订单数据
+        Long userId = BaseContext.getCurrentId();
+        ordersPageQueryDTO.setUserId(userId);
 
         //开启分页
         int pageNum = ordersPageQueryDTO.getPage();
@@ -190,8 +194,10 @@ public class OrderServiceImpl implements OrderService {
         //构造要OrderVO对象集合
         List<OrderVO> orderVOList = new ArrayList<>();
 
+        List<Orders> ordersList = pageOrders.getResult();
+
         //封装集合中的OrderVO对象
-        for (Orders orders : pageOrders) {
+        for (Orders orders : ordersList) {
             OrderVO orderVO = new OrderVO();
             BeanUtils.copyProperties(orders, orderVO);
 
@@ -302,6 +308,72 @@ public class OrderServiceImpl implements OrderService {
         //批量插入购物车数据
         shoppingCartMapper.insertBatch(shoppingCartList);
 
+    }
+
+    /**
+     * 订单搜索
+     * @param ordersPageQueryDTO
+     * @return
+     */
+    @Override
+    public PageResult conditionSearch(OrdersPageQueryDTO ordersPageQueryDTO) {
+
+        //开启分页
+        int pageNum = ordersPageQueryDTO.getPage();
+        int pageSize = ordersPageQueryDTO.getPageSize();
+        PageHelper.startPage(pageNum, pageSize);
+
+        Page<Orders> page = orderMapper.pageQuery(ordersPageQueryDTO);
+
+        //封装OrderVO集合
+        List<OrderVO> orderVOList = getOrderVOList(page);
+
+        return new PageResult(page.getTotal(), orderVOList);
+    }
+
+
+    //封装OrderVO方法
+    private List<OrderVO> getOrderVOList(Page<Orders> page) {
+
+        List<OrderVO> orderVOList = new ArrayList<>();
+
+        List<Orders> ordersList = page.getResult();
+
+        if (!CollectionUtils.isEmpty(ordersList)) {
+            for (Orders orders : page) {
+                OrderVO orderVO = new OrderVO();
+                BeanUtils.copyProperties(orders, orderVO);
+
+                //获取菜品信息orderDishes，封装到OrderVO中
+                String orderDishes = getOrderDishesStr(orders);
+                orderVO.setOrderDishes(orderDishes);
+
+                orderVOList.add(orderVO);
+            }
+        }
+
+        return orderVOList;
+    }
+
+
+    /**
+     * 根据订单id获取菜品信息字符串
+     *
+     * @param orders
+     * @return
+     */
+    private String getOrderDishesStr(Orders orders) {
+        // 查询订单菜品详情信息（订单中的菜品和数量）
+        List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(orders.getId());
+
+        // 将每一条订单菜品信息拼接为字符串（格式：宫保鸡丁*3；）
+        List<String> orderDishList = orderDetailList.stream().map(x -> {
+            String orderDish = x.getName() + "*" + x.getNumber() + ";";
+            return orderDish;
+        }).collect(Collectors.toList());
+
+        // 将该订单对应的所有菜品信息拼接在一起
+        return String.join("", orderDishList);
     }
 
 }
