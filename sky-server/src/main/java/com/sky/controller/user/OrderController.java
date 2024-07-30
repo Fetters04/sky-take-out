@@ -114,4 +114,22 @@ public class OrderController {
         return Result.success();
     }
 
+
+    /**
+     * 再来一单
+     * @param id
+     * @return
+     */
+    @PostMapping("/repetition/{id}")
+    @ApiOperation("再来一单")
+    public Result repetition(@PathVariable Long id) {
+
+        log.info("再来一单: {}", id);
+
+        orderService.repetition(id);
+
+        return Result.success();
+    }
+
+
 }
