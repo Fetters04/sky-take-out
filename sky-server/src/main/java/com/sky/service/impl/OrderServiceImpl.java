@@ -294,12 +294,12 @@ public class OrderServiceImpl implements OrderService {
 
         //若处于待接单状态下，需要进行退款
         if (status.equals(Orders.TO_BE_CONFIRMED)) {
-            //调用微信支付退款接口
-            weChatPayUtil.refund(
-                    orders.getNumber(), //商户订单号
-                    orders.getNumber(), //商户退款单号
-                    new BigDecimal(0.01),//退款金额，单位 元
-                    new BigDecimal(0.01));//原订单金额
+            // //调用微信支付退款接口
+            // weChatPayUtil.refund(
+            //         orders.getNumber(), //商户订单号
+            //         orders.getNumber(), //商户退款单号
+            //         new BigDecimal(0.01),//退款金额，单位 元
+            //         new BigDecimal(0.01));//原订单金额
 
             //支付状态修改为 退款
             orders.setPayStatus(Orders.REFUND);
@@ -506,14 +506,14 @@ public class OrderServiceImpl implements OrderService {
         //支付状态
         Integer payStatus = ordersDB.getPayStatus();
         if (payStatus == Orders.PAID) {
-            //用户已支付并且订单未完成, 需要退款
-            String refund = weChatPayUtil.refund(
-                    ordersDB.getNumber(),
-                    ordersDB.getNumber(),
-                    new BigDecimal(0.01),
-                    new BigDecimal(0.01));
-
-            log.info("申请退款：{}", refund);
+            // //用户已支付并且订单未完成, 需要退款
+            // String refund = weChatPayUtil.refund(
+            //         ordersDB.getNumber(),
+            //         ordersDB.getNumber(),
+            //         new BigDecimal(0.01),
+            //         new BigDecimal(0.01));
+            //
+            // log.info("申请退款：{}", refund);
 
             //支付状态修改为退款
             ordersDB.setPayStatus(Orders.REFUND);
@@ -577,6 +577,32 @@ public class OrderServiceImpl implements OrderService {
                 .build();
 
         orderMapper.update(orders);
+
+    }
+
+    /**
+     * 催单
+     * @param id
+     */
+    @Override
+    public void reminder(Long id) {
+
+        //查询订单
+        Orders ordersDB = orderMapper.getById(id);
+
+        //校验订单是否存在
+        if (ordersDB == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+
+        //向管理端推送催单提醒
+        Map map = new HashMap();
+        map.put("type", 2);     //1-来单提醒 2-客户催单
+        map.put("orderId", id);
+        map.put("content", "订单号：" + ordersDB.getNumber());
+
+        String json = JSON.toJSONString(map);
+        webSocketServer.sendToAllClient(json);
 
     }
 
