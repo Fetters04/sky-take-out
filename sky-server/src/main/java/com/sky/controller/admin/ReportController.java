@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDate;
 
 @RestController
@@ -29,6 +30,7 @@ public class ReportController {
 
     /**
      * 营业额统计
+     *
      * @param begin
      * @param end
      * @return
@@ -49,6 +51,7 @@ public class ReportController {
 
     /**
      * 用户统计
+     *
      * @param begin
      * @param end
      * @return
@@ -69,6 +72,7 @@ public class ReportController {
 
     /**
      * 订单统计
+     *
      * @param begin
      * @param end
      * @return
@@ -87,6 +91,13 @@ public class ReportController {
     }
 
 
+    /**
+     * 订单统计
+     *
+     * @param begin
+     * @param end
+     * @return
+     */
     @GetMapping("/top10")
     @ApiOperation("订单统计")
     public Result<SalesTop10ReportVO> top10(
@@ -98,6 +109,18 @@ public class ReportController {
         SalesTop10ReportVO salesTop10ReportVO = reportService.getSalesTop10(begin, end);
 
         return Result.success(salesTop10ReportVO);
+    }
+
+
+    /**
+     * 导出Excel报表
+     *
+     * @param response
+     */
+    @GetMapping("/export")
+    @ApiOperation("导出Excel报表")
+    public void export(HttpServletResponse response) {
+        reportService.exportBusinessDate(response);
     }
 
 }
