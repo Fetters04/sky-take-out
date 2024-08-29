@@ -8,16 +8,16 @@ sky:
     password: 123456
   alioss:
     endpoint: oss-cn-hangzhou.aliyuncs.com
-    access-key-id: LTAI5tJjyQt1koA5p6CSvjEV
-    access-key-secret: JtTsB7nj1CBziZE4a3vA5fiVkcqRQS
+    access-key-id: ???
+    access-key-secret: ???
     bucket-name: sky-nnnu
   redis:
     host: localhost
     port: 6379
     database: 10
   wechat:
-    appid: wx8031519eeff1e026
-    secret: 879c18ad626ae3d69872948e8e32cf66
+    appid: ???
+    secret: ???
     mchid:
     mch-serial-no:
     private-key-file-path:
